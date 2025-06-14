@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+import json
+import sys
+import requests
+from bs4 import BeautifulSoup
+
+def get_top_n_movies(n):
+  """
+  Scrape the top N rated movies from IMDb.
+  """
+  # URL for IMDb top rated movies.
+  url = "https://www.imdb.com/chart/top/"
+
+  # Send request with headers to mimic a browser.
+  headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+  }
+  response = requests.get(url, headers=headers)
+
+  if response.status_code != 200:
+    print(f"Failed to retrieve data: {response.status_code}")
+    sys.exit(1)
+
+  # Parse the HTML content.
+  soup = BeautifulSoup(response.text, 'html.parser')
+
+  # Initialize list to store movie data.
+  movies_list = []
+
+  # Find all movie entries.
+  movie_containers = soup.select("li.ipc-metadata-list-summary-item")
+
+  # Limit to top N movies.
+  for i, movie in enumerate(movie_containers[:n]):
+    # Extract movie name.
+    name_element = movie.select_one("h3.ipc-title__text")
+    name = name_element.text.strip() if name_element else "N/A"
+    # Clean up the name (remove the rank number prefix).
+    if '. ' in name:
+      name = name.split('. ', 1)[1]
+
+    # Extract rating.
+    rating_element = movie.select_one("span.ipc-rating-star--imdb")
+    rating = rating_element.text.strip().split()[0] if rating_element else "N/A"
+
+    # Extract genre - this is more complex and may require additional requests.
+    # For simplicity, we'll make another request to the movie's page.
+    movie_link = movie.select_one("a")
+    if movie_link and 'href' in movie_link.attrs:
+      movie_url = "https://www.imdb.com" + movie_link['href']
+      movie_response = requests.get(movie_url, headers=headers)
+
+      if movie_response.status_code == 200:
+        movie_soup = BeautifulSoup(movie_response.text, 'html.parser')
+        genre_elements = movie_soup.select("span.ipc-chip__text")
+        genres = [genre.text for genre in genre_elements if genre.text not in ["Back to top", "User reviews", "Critic reviews"]][:3]  # Get first 3 genres.
+      else:
+        genres = ["N/A"]
+    else:
+      genres = ["N/A"]
+
+    # Create movie dictionary.
+    movie_data = {
+      "Movie score": float(rating) if rating != "N/A" else None,
+      "Movie name": name,
+      "Movie genre": genres
+    }
+
+    # Print movie data to stderr for debugging.
+    print(f"Processing movie {i + 1}: {name}", file=sys.stderr)
+
+    # Add to our list.
+    movies_list.append(movie_data)
+
+  return movies_list
+
+def main():
+  # Check if argument is provided.
+  if len(sys.argv) != 2:
+    print("Usage: python top_imdb_movies.py <number-of-movies>")
+    sys.exit(1)
+
+  try:
+    n = int(sys.argv[1])
+    if n <= 0:
+      raise ValueError
+  except:
+    print("Number of movies must be a positive integer.", file=sys.stderr)
+    sys.exit(1)
+
+  # Get the top n movies.
+  print(f"Fetching the top {n} rated movies from IMDb...", file=sys.stderr)
+  movies = get_top_n_movies(n)
+
+  # Output the result in JSON format.
+  print(json.dumps(movies, indent=2))
+
+if __name__ == "__main__":
+  main()

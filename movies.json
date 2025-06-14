@@ -1,0 +1,227 @@
+[
+  {
+    "Movie score": 9.3,
+    "Movie name": "The Shawshank Redemption",
+    "Movie genre": [
+      "Epic",
+      "Period Drama",
+      "Prison Drama"
+    ]
+  },
+  {
+    "Movie score": 9.2,
+    "Movie name": "The Godfather",
+    "Movie genre": [
+      "Epic",
+      "Gangster",
+      "Tragedy"
+    ]
+  },
+  {
+    "Movie score": 9.0,
+    "Movie name": "The Dark Knight",
+    "Movie genre": [
+      "Action Epic",
+      "Epic",
+      "Superhero"
+    ]
+  },
+  {
+    "Movie score": 9.0,
+    "Movie name": "The Godfather Part II",
+    "Movie genre": [
+      "Epic",
+      "Gangster",
+      "Tragedy"
+    ]
+  },
+  {
+    "Movie score": 9.0,
+    "Movie name": "De 12 gezworenen",
+    "Movie genre": [
+      "Legal Drama",
+      "Psychological Drama",
+      "Crime"
+    ]
+  },
+  {
+    "Movie score": 9.0,
+    "Movie name": "The Lord of the Rings: The Return of the King",
+    "Movie genre": [
+      "Action Epic",
+      "Adventure Epic",
+      "Epic"
+    ]
+  },
+  {
+    "Movie score": 9.0,
+    "Movie name": "Schindler's List",
+    "Movie genre": [
+      "Docudrama",
+      "Epic",
+      "Historical Epic"
+    ]
+  },
+  {
+    "Movie score": 8.8,
+    "Movie name": "Pulp Fiction",
+    "Movie genre": [
+      "Dark Comedy",
+      "Drug Crime",
+      "Gangster"
+    ]
+  },
+  {
+    "Movie score": 8.9,
+    "Movie name": "The Lord of the Rings: The Fellowship of the Ring",
+    "Movie genre": [
+      "Action Epic",
+      "Adventure Epic",
+      "Dark Fantasy"
+    ]
+  },
+  {
+    "Movie score": 8.8,
+    "Movie name": "The Good, the Bad and the Ugly",
+    "Movie genre": [
+      "Adventure Epic",
+      "Dark Comedy",
+      "Desert Adventure"
+    ]
+  },
+  {
+    "Movie score": 8.8,
+    "Movie name": "Forrest Gump",
+    "Movie genre": [
+      "Epic",
+      "Drama",
+      "Romance"
+    ]
+  },
+  {
+    "Movie score": 8.8,
+    "Movie name": "The Lord of the Rings: The Two Towers",
+    "Movie genre": [
+      "Action Epic",
+      "Adventure Epic",
+      "Dark Fantasy"
+    ]
+  },
+  {
+    "Movie score": 8.8,
+    "Movie name": "Fight Club",
+    "Movie genre": [
+      "Dark Comedy",
+      "Psychological Drama",
+      "Psychological Thriller"
+    ]
+  },
+  {
+    "Movie score": 8.8,
+    "Movie name": "Inception",
+    "Movie genre": [
+      "Action Epic",
+      "Adventure Epic",
+      "Epic"
+    ]
+  },
+  {
+    "Movie score": 8.7,
+    "Movie name": "Star Wars: Episode V - The Empire Strikes Back",
+    "Movie genre": [
+      "Action Epic",
+      "Adventure Epic",
+      "Dark Fantasy"
+    ]
+  },
+  {
+    "Movie score": 8.7,
+    "Movie name": "The Matrix",
+    "Movie genre": [
+      "Action Epic",
+      "Artificial Intelligence",
+      "Cyberpunk"
+    ]
+  },
+  {
+    "Movie score": 8.7,
+    "Movie name": "Goodfellas",
+    "Movie genre": [
+      "Docudrama",
+      "Gangster",
+      "True Crime"
+    ]
+  },
+  {
+    "Movie score": 8.7,
+    "Movie name": "Interstellar",
+    "Movie genre": [
+      "Adventure Epic",
+      "Epic",
+      "Quest"
+    ]
+  },
+  {
+    "Movie score": 8.7,
+    "Movie name": "One Flew Over the Cuckoo's Nest",
+    "Movie genre": [
+      "Medical Drama",
+      "Psychological Drama",
+      "Drama"
+    ]
+  },
+  {
+    "Movie score": 8.6,
+    "Movie name": "Seven",
+    "Movie genre": [
+      "Cop Drama",
+      "Hard-boiled Detective",
+      "Police Procedural"
+    ]
+  },
+  {
+    "Movie score": 8.6,
+    "Movie name": "It's a Wonderful Life",
+    "Movie genre": [
+      "Feel-Good Romance",
+      "Holiday Family",
+      "Holiday Romance"
+    ]
+  },
+  {
+    "Movie score": 8.6,
+    "Movie name": "The Silence of the Lambs",
+    "Movie genre": [
+      "Police Procedural",
+      "Psychological Drama",
+      "Psychological Horror"
+    ]
+  },
+  {
+    "Movie score": 8.6,
+    "Movie name": "Shichinin no samurai",
+    "Movie genre": [
+      "Action Epic",
+      "Epic",
+      "Period Drama"
+    ]
+  },
+  {
+    "Movie score": 8.6,
+    "Movie name": "Saving Private Ryan",
+    "Movie genre": [
+      "Epic",
+      "Period Drama",
+      "War Epic"
+    ]
+  },
+  {
+    "Movie score": 8.6,
+    "Movie name": "Cidade de Deus",
+    "Movie genre": [
+      "Caper",
+      "Coming-of-Age",
+      "Gangster"
+    ]
+  }
+]
