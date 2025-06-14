@@ -1,0 +1,32 @@
+{
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.black-formatter",
+        "ms-python.mypy-type-checker",
+        "ms-python.python"
+      ],
+      "settings": {
+        "[bash]": {
+          "editor.rulers": [
+            80
+          ]
+        },
+        "[markdown]": {
+          "editor.rulers": [
+            80
+          ]
+        },
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.rulers": [
+            88
+          ]
+        },
+        "editor.formatOnSave": true,
+        "python.linting.enabled": true
+      }
+    }
+  },
+  "postCreateCommand": "./.devcontainer/setup.sh"
+}

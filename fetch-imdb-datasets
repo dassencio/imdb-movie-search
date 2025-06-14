@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Base URL for IMDb datasets.
+imdb_url="https://datasets.imdbws.com"
+
+# Directory where IMDb datasets will be stored.
+dataset_dir="./datasets"
+
+# Datasets to be downloaded.
+declare -A dataset_files=(
+  ["akas"]="title.akas.tsv.gz"
+  ["basics"]="title.basics.tsv.gz"
+  ["ratings"]="title.ratings.tsv.gz"
+)
+
+rm -rf "$dataset_dir"
+mkdir -p "$dataset_dir"
+
+log() {
+  echo "$1" >&2
+}
+
+# Download, decompress and process all datasets.
+for dataset in "${!dataset_files[@]}"; do
+  log "Downloading '$dataset' dataset..."
+  filename="${dataset_files[$dataset]}"
+  url="${imdb_url}/${filename}"
+  wget -q -O "$dataset_dir/$filename" "$url"
+
+  log "Decompressing '$dataset' dataset..."
+  gunzip -f "$dataset_dir/$filename"
+  filename="${filename%.gz}"
+
+  log "Filtering '$dataset' dataset..."
+
+  # From the 'basics' dataset, preserve only records that are movies, and only
+  # the columns:
+  #
+  # 1 - tconst         --> renamed to 'id'
+  # 6 - startYear      --> renamed to 'year'
+  # 8 - runtimeMinutes --> renamed to 'duration'
+  # 9 - genres         --> renamed to 'genres'
+  if [[ "$dataset" == "basics" ]]
+  then
+    echo -e "id\tyear\tduration\tgenres" > "$dataset_dir/$dataset.tsv"
+    tail -n +2 "$dataset_dir/$filename" | \
+      awk -F'\t' '$2 == "movie"' | \
+      cut -d$'\t' -f1,6,8,9 >> "$dataset_dir/$dataset.tsv"
+  fi
+
+  # From the 'akas' dataset, preserve only the records that have 'region' set
+  # to 'US' and language set to '\N' (presumed English), and only the following
+  # columns:
+  #
+  # 1 - titleId --> renamed to 'id'
+  # 3 - title   --> preserved as 'title'
+  if [[ "$dataset" == "akas" ]]
+  then
+    echo -e "id\ttitle" > "$dataset_dir/$dataset.tsv"
+    tail -n +2 "$dataset_dir/$filename" | \
+      awk -F'\t' '$4 == "US" && $5 == "\\N" && $7 == "\\N"' | \
+      cut -d$'\t' -f1,3 >> "$dataset_dir/$dataset.tsv"
+  fi
+
+  # From the 'ratings' dataset, preserve all columns:
+  # 1 - tconst        --> renamed to 'id'
+  # 2 - averageRating --> renamed to 'rating'
+  # 3 - numVotes      --> renamed to 'num_votes'
+  if [[ "$dataset" == "ratings" ]]
+  then
+    echo -e "id\trating\tnum_votes" > "$dataset_dir/$dataset.tsv"
+    tail -n +2 "$dataset_dir/$filename" >> "$dataset_dir/$dataset.tsv"
+  fi
+
+  rm "$dataset_dir/$filename"
+done
+
+log "Done."

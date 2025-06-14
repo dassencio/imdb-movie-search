@@ -1,0 +1,398 @@
+#!/usr/bin/env python3
+
+import argparse
+import csv
+import datetime
+import json
+import os
+import re
+import subprocess
+import sys
+import typing
+
+
+# Directory where the pre-processed IMDb datasets are stored.
+datasets_dir = "./datasets"
+
+akas_db = os.path.join(datasets_dir, "akas.tsv")
+basics_db = os.path.join(datasets_dir, "basics.tsv")
+ratings_db = os.path.join(datasets_dir, "ratings.tsv")
+
+all_genres = set(
+    [
+        "Action",
+        "Adult",
+        "Adventure",
+        "Animation",
+        "Biography",
+        "Comedy",
+        "Crime",
+        "Documentary",
+        "Drama",
+        "Family",
+        "Fantasy",
+        "Film-Noir",
+        "Game-Show",
+        "History",
+        "Horror",
+        "Music",
+        "Musical",
+        "Mystery",
+        "News",
+        "Reality-TV",
+        "Romance",
+        "Sci-Fi",
+        "Short",
+        "Sport",
+        "Talk-Show",
+        "Thriller",
+        "War",
+        "Western",
+    ]
+)
+
+
+def log(message: str):
+    print(message, file=sys.stderr)
+
+
+class MovieQueryParams:
+    def __init__(
+        self,
+        min_duration: int,
+        max_duration: int,
+        min_rating: float,
+        max_rating: float,
+        min_num_votes: int,
+        max_num_votes: int,
+        min_year: int,
+        max_year: int,
+        genres: set[str],
+    ):
+        if min_duration < 0:
+            log("Error: minimum duration must be a non-negative integer.")
+            sys.exit(1)
+        if max_duration < min_duration:
+            log("Error: maximum duration cannot be smaller than minimum duration.")
+            sys.exit(1)
+        if not 0 <= min_rating <= 10:
+            log("Error: minimum rating must be between 0 and 10.")
+            sys.exit(1)
+        if min_num_votes < 0:
+            log("Error: minimum number of votes must be a non-negative integer.")
+            sys.exit(1)
+        if max_num_votes < min_num_votes:
+            log(
+                "Error: maximum number of votes cannot be smaller than minimum number of votes."
+            )
+            sys.exit(1)
+        if min_year < 1888:
+            log("Error: minimum movie year must be 1888 or later.")
+            sys.exit(1)
+        if max_year < min_year:
+            log("Error: maximum movie year cannot be smaller than minimum movie year.")
+            sys.exit(1)
+        if not genres <= all_genres:
+            log(
+                f"Error: Invalid genres specified. Allowed genres are: {', '.join(all_genres)}."
+            )
+            sys.exit(1)
+
+        self._min_duration = min_duration
+        self._max_duration = max_duration
+        self._min_rating = min_rating
+        self._max_rating = max_rating
+        self._min_num_votes = min_num_votes
+        self._max_num_votes = max_num_votes
+        self._min_year = min_year
+        self._max_year = max_year
+        self._genres = genres
+
+
+class Movie:
+    def __init__(self, id: str):
+        if not re.match(r"^tt\d{7,}$", id):
+            raise ValueError(f"Invalid IMDb movie ID: {id}")
+        self._id = id
+        self._title: str | None = None
+        self._duration: int | None = None
+        self._rating: float | None = None
+        self._num_votes: int | None = None
+        self._year: int | None = None
+        self._genres: set[str] | None = None
+
+    def has_title(self):
+        return self._title is not None
+
+    def set_title(self, title: str):
+        if title == "\\N":
+            raise ValueError(f"{self._id}: Invalid movie title '{title}'.")
+        self._title = title
+
+    def set_duration(self, duration: int):
+        if duration < 0:
+            raise ValueError(f"{self._id}: Invalid duration '{duration}'.")
+        self._duration = duration
+
+    def set_rating(self, rating: float, num_votes: int):
+        if not 0 <= rating <= 10:
+            raise ValueError(f"{self._id}: Invalid movie rating '{rating}'.")
+        if not num_votes >= 0:
+            raise ValueError(f"{self._id}: Invalid number of votes '{num_votes}'.")
+        self._rating = rating
+        self._num_votes = num_votes
+
+    def set_year(self, year: int):
+        if year < 1888:
+            raise ValueError(f"{self._id}: Invalid movie year '{year}'.")
+        self._year = year
+
+    def set_genres(self, genres: set[str]):
+        if not genres <= all_genres:
+            raise ValueError(f"{self._id}: Invalid genres '{genres}'.")
+        self._genres = genres
+
+    def is_data_complete(self):
+        return (
+            self._title is not None
+            and self._duration is not None
+            and self._rating is not None
+            and self._num_votes is not None
+            and self._year is not None
+            and self._genres is not None
+        )
+
+    def matches_requirements(self, query_params):
+        return (
+            self.is_data_complete()
+            and query_params._min_duration
+            <= self._duration
+            <= query_params._max_duration
+            and query_params._min_rating <= self._rating <= query_params._max_rating
+            and query_params._min_num_votes
+            <= self._num_votes
+            <= query_params._max_num_votes
+            and query_params._min_year <= self._year <= query_params._max_year
+            and self._genres & query_params._genres
+        )
+
+    def to_list(self):
+        return [
+            self._id,
+            self._title,
+            self._duration,
+            self._rating,
+            self._num_votes,
+            self._year,
+            " / ".join(self._genres),
+        ]
+
+    def to_dict(self):
+        return {
+            "id": self._id,
+            "title": self._title,
+            "duration": self._duration,
+            "rating": self._rating,
+            "num_votes": self._num_votes,
+            "year": self._year,
+            "genres": " / ".join(self._genres),
+        }
+
+
+def check_datasets():
+    return (
+        os.path.exists(datasets_dir)
+        and os.path.exists(akas_db)
+        and os.path.exists(basics_db)
+        and os.path.exists(ratings_db)
+    )
+
+
+def query_movie_db(
+    query_params: MovieQueryParams,
+):
+    check_datasets()
+
+    movies: dict[str, Movie] = {}
+    # Identify all movies in the database and determine their years and genres.
+    with open(basics_db, newline="", encoding="utf-8") as f:
+        log(f"Processing '{basics_db}'...")
+        rows = list(csv.DictReader(f, delimiter="\t"))
+        for row in rows:
+            movie_id = row["id"]
+            year = row["year"]
+            duration = row["duration"]
+            genres = row["genres"]
+            if movie_id in movies:
+                raise ValueError(f"Duplicate movie ID found: {movie_id}")
+            movies[movie_id] = Movie(movie_id)
+            if year != "\\N":
+                movies[movie_id].set_year(int(year))
+            if duration != "\\N":
+                movies[movie_id].set_duration(int(duration))
+            if genres != "\\N":
+                movies[movie_id].set_genres(set(genres.split(",")))
+        log(f"Found {len(rows)} records in '{basics_db}'.")
+
+    # Determine movie titles.
+    with open(akas_db, newline="", encoding="utf-8") as f:
+        log(f"Processing '{akas_db}'...")
+        rows = list(csv.DictReader(f, delimiter="\t"))
+        for row in rows:
+            # Not all records in the akas database correspond to a movie.
+            if movie := movies.get(row["id"]):
+                if not movie.has_title():
+                    movie.set_title(row["title"])
+        log(f"Found {len(rows)} records in '{akas_db}'.")
+
+    # Determine movie ratings.
+    with open(ratings_db, newline="", encoding="utf-8") as f:
+        log(f"Processing '{ratings_db}'...")
+        rows = list(csv.DictReader(f, delimiter="\t"))
+        for row in rows:
+            # Not all records in the ratings database correspond to a movie.
+            if movie := movies.get(row["id"]):
+                movie.set_rating(float(row["rating"]), int(row["num_votes"]))
+        log(f"Found {len(rows)} records in '{ratings_db}'.")
+
+    # Discard movies that don't match the query requirements.
+    matching_movies = sorted(
+        [
+            movie
+            for movie in movies.values()
+            if movie.matches_requirements(query_params)
+        ],
+        key=lambda movie: typing.cast(float, movie._rating),
+        reverse=True,
+    )
+
+    log(f"Found {len(matching_movies)} movies matching the search criteria.")
+    return matching_movies
+
+
+def generate_tsv_output(movies):
+    with open("movies.tsv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, delimiter="\t")
+        writer.writerow(
+            ["id", "title", "duration", "rating", "num_votes", "year", "genres"]
+        )
+        for movie in movies:
+            writer.writerow(movie.to_list())
+
+
+def generate_json_output(movies):
+    with open("movies.json", "w", newline="", encoding="utf-8") as f:
+        json.dump([movie.to_dict() for movie in movies], f, indent=2)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--min-duration",
+        type=int,
+        required=False,
+        default=0,
+        help="minimum movie duration in minutes (e.g. 60)",
+    )
+    parser.add_argument(
+        "--max-duration",
+        type=int,
+        required=False,
+        default=sys.maxsize,
+        help="maximum movie duration in minutes (e.g. 180)",
+    )
+    parser.add_argument(
+        "--min-rating",
+        type=float,
+        required=False,
+        default=0.0,
+        help="minimum movie average rating required for it to be included (e.g. 5.0)",
+    )
+    parser.add_argument(
+        "--max-rating",
+        type=float,
+        required=False,
+        default=10.0,
+        help="maximum movie average rating for it to be included (e.g. 7.5)",
+    )
+    parser.add_argument(
+        "--min-num-votes",
+        type=int,
+        required=False,
+        default=0,
+        help="minimum number of movie votes for it to be included (e.g. 10000)",
+    )
+    parser.add_argument(
+        "--max-num-votes",
+        type=int,
+        required=False,
+        default=sys.maxsize,
+        help="maximum number of movie votes for it to be included (e.g. 100000)",
+    )
+    parser.add_argument(
+        "--min-year",
+        type=int,
+        required=False,
+        default=1888,
+        help="minimum movie year for it to be included (e.g. 2005)",
+    )
+    parser.add_argument(
+        "--max-year",
+        type=int,
+        required=False,
+        default=datetime.datetime.now().strftime("%Y"),
+        help="maximum movie year for it to be included (e.g. 2025)",
+    )
+    parser.add_argument(
+        "--genres",
+        type=str,
+        required=False,
+        default=",".join(all_genres),
+        help="comma-separated list of genres to include (e.g. Action,Drama,Sci-Fi)",
+    )
+    parser.add_argument(
+        "--output-format",
+        type=str,
+        required=False,
+        default="tsv",
+        choices=["json", "tsv"],
+        help="output format for the query results (tsv or json)",
+    ),
+    parser.add_argument(
+        "--refresh-datasets",
+        action="store_true",
+        required=False,
+        default=False,
+        help="force refresh of IMDb datasets",
+    )
+
+    args = parser.parse_args()
+
+    if not check_datasets() or args.refresh_datasets:
+        try:
+            subprocess.run(["./fetch-imdb-datasets"], check=True)
+        except subprocess.CalledProcessError as error:
+            log(f"Failed to fetch IMDb datasets: {error}")
+            sys.exit(1)
+
+    query_params = MovieQueryParams(
+        args.min_duration,
+        args.max_duration,
+        args.min_rating,
+        args.max_rating,
+        args.min_num_votes,
+        args.max_num_votes,
+        args.min_year,
+        args.max_year,
+        set(args.genres.split(",")),
+    )
+
+    movies = query_movie_db(query_params)
+    if args.output_format == "tsv":
+        generate_tsv_output(movies)
+    else:
+        generate_json_output(movies)
+
+
+if __name__ == "__main__":
+    main()
