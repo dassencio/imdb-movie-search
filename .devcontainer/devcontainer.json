@@ -1,0 +1,22 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-node-azure-pack"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.rulers": [
+          100
+        ],
+        "eslint.autoFixOnSave": true,
+        "eslint.enable": true
+      }
+    }
+  },
+  "postCreateCommand": "npm install"
+}
