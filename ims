@@ -369,8 +369,8 @@ def main():
     if not check_datasets() or args.refresh_datasets:
         try:
             subprocess.run(["./fetch-imdb-datasets"], check=True)
-        except subprocess.CalledProcessError as error:
-            error(f"Failed to fetch IMDb datasets: {error}")
+        except subprocess.CalledProcessError as subprocess_error:
+            error(f"Failed to fetch IMDb datasets: {subprocess_error}")
 
     query_params = MovieQueryParams(
         args.min_duration,
