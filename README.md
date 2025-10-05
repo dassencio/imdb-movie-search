@@ -1,151 +1,144 @@
 # IMDb Movie Search
 
-This repository contains a command-line tool (`ims`) for searching and filtering
-movies from the IMDb datasets. This tool downloads, processes, and provides a
-flexible interface to query the IMDb movie database with various criteria such
-as rating, year, duration, genre, and number of votes.
+This repository provides a command-line tool (`ims`) for searching IMDb's movie
+datasets by various criteria such as rating, year, duration, genre, and number
+of votes.
 
 ## Description
 
-On the first time you execute `ims`, it will automatically download and
+When you run `ims` for the first time, it will automatically download and
 preprocess the latest IMDb datasets from
-[datasets.imdbws.com](https://datasets.imdbws.com). The datasets are initially
-processed to create a clean, searchable database of movies (excluding TV series,
-episodes etc.) and focuses on English titles to provide a consistent and
-searchable database.
+[datasets.imdbws.com](https://datasets.imdbws.com). The preprocessing step
+creates a clean, searchable database of movies (excluding TV shows, episodes,
+etc.), with a focus on English-language titles for consistency.
 
-**Note**: The download and processing may take several minutes depending on your
-internet connection and system performance.
+**Note:** The initial download and processing may take several minutes,
+depending on your internet speed and system performance.
 
 ## Usage instructions
 
-To search for movies matching certain criteria, simply use the `ims` tool:
+To search for movies, simply run:
 
 ```bash
 ./ims [OPTIONS]
 ```
 
-#### Available options
+### Options
 
 - `--min-duration NUM`: Minimum movie duration in minutes (default: `0`)
-- `--max-duration NUM`: Maximum movie duration in minutes (default: `unlimited`)
-- `--min-rating FLOAT`: Minimum average rating (`0.0` - `10.0`, default: `0.0`)
-- `--max-rating FLOAT`: Maximum average rating (`0.0` - `10.0`, default: `10.0`)
+- `--max-duration NUM`: Maximum movie duration in minutes (default: unlimited)
+- `--min-rating FLOAT`: Minimum average rating (`0.0`–`10.0`, default: `0.0`)
+- `--max-rating FLOAT`: Maximum average rating (`0.0`–`10.0`, default: `10.0`)
 - `--min-num-votes NUM`: Minimum number of votes (default: `0`)
-- `--max-num-votes NUM`: Maximum number of votes (default: `unlimited`)
+- `--max-num-votes NUM`: Maximum number of votes (default: unlimited)
 - `--min-year YEAR`: Minimum release year (default: `1888`)
 - `--max-year YEAR`: Maximum release year (default: current year)
-- `--genres LIST`: Comma-separated list of genres to include (default: all
-  genres)
-- `--output-format FORMAT`: Output format - `tsv` or `json` (default: `tsv`)
+- `--genres LIST`: Comma-separated list of genres to include (default: all)
+- `--output-format FORMAT`: Output format (`tsv` or `json`, default: `tsv`)
 - `--refresh-datasets`: Force refresh of IMDb datasets
 - `-h, --help`: Show help message and exit
 
-#### Available genres
+### Available genres
 
-The following genres can be used with the `--genres` option:
+The `--genres` option accepts any of the following:
 
   Action, Adult, Adventure, Animation, Biography, Comedy, Crime, Documentary,
   Drama, Family, Fantasy, Film-Noir, Game-Show, History, Horror, Music, Musical,
   Mystery, News, Reality-TV, Romance, Sci-Fi, Short, Sport, Talk-Show, Thriller,
   War, Western
 
-### Usage examples
+## Examples
 
-**Find highly-rated action movies from the 2000s:**
+**Highly rated action movies from the 2000s:**
 
 ```bash
 ./ims --min-rating 7.0 --min-year 2000 --max-year 2009 --genres Action --min-num-votes 100000
 ```
 
-**Find recent comedy movies under 2 hours:**
+**Recent comedies under 2 hours (JSON output):**
 
 ```bash
 ./ims --min-year 2025 --max-duration 120 --genres Comedy --output-format json
 ```
 
-**Find top-rated movies with high vote counts:**
+**Top-rated classics with strong vote counts:**
 
 ```bash
 ./ims --max-year 1980 --min-num-votes 50000 --min-rating 8.0
 ```
 
-**Find long epic movies:**
+**Epic long-form dramas/adventures:**
 
 ```bash
 ./ims --min-duration 180 --genres Drama,Adventure,War --min-rating 7.5
 ```
 
-Using `--min-num-votes` allows you to filter out movies with low popularity,
-ensuring you get well-regarded titles instead of a long list full of less-known
-ones.
+**Tip:** Using `--min-num-votes` helps filter out less known movies, leaving
+only well-regarded titles.
 
-### Output formats
+## Output formats
 
-#### TSV output (default)
+### TSV (default)
 
-By default, the output is a TSV (tab-separated values) file named `movies.tsv`
-with the following columns:
+By default, results are saved as a TSV (tab-separated values) file named
+`movies.tsv` with these columns:
 
 - `id`: IMDb title identifier (e.g., `tt1234567`)
 - `title`: Movie title
 - `duration`: Duration in minutes
-- `rating`: Average rating (`0.0` - `10.0`)
+- `rating`: Average rating (`0.0`–`10.0`)
 - `num_votes`: Number of votes
 - `year`: Release year
 - `genres`: Genres separated by ` / `
 
-#### JSON output
+### JSON
 
-Structured JSON array with movie objects containing the same fields as the
-columns from the TSV format.
+When `--output-format json` is used, results are written as a structured JSON
+array. Each movie object contains the same fields as above.
 
-### Updating the movie datasets
+## Updating the dataset
 
-IMDb datasets are updated regularly. To get the latest version, you can run the
-following command:
+IMDb updates its datasets regularly. To refresh the local copies of the
+datasets, run:
 
 ```bash
 ./fetch-imdb-datasets
 ```
 
-Alternatively, add the `--refresh-datasets` flag to your `ims` command to force
-a dataset refresh:
+Alternatively, add the `--refresh-datasets` flag when running `ims`:
 
 ```bash
-./ims --refresh-datasets ...
+./ims [OPTIONS] --refresh-datasets
 ```
 
-### Visualizing results with VisiData
+## Exploring results with VisiData
 
-If you're working in a GitHub Codespace or VS Code devcontainer, you can use
-[VisiData](https://visidata.org/) to explore the generated file interactively
-by running:
+If you're in a GitHub Codespace or VS Code devcontainer, you can explore results
+interactively with [VisiData](https://visidata.org/):
 
 ```bash
 vd movies.tsv
 ```
 
-or, in the case of JSON output:
+For JSON output, run:
 
 ```bash
 vd movies.json
 ```
 
-To install and use VisiData locally, open a terminal and run:
+To install VisiData locally, run:
 
 ```bash
 pip install visidata
 ```
 
-Below are some helpful navigation controls:
+### Helpful VisiData shortcuts
 
 - <kbd>↑</kbd> / <kbd>↓</kbd> / <kbd>←</kbd> / <kbd>→</kbd>: Move cursor
 - <kbd>/</kbd>: Search
-- <kbd>g g</kbd>: Go to the first row
-- <kbd>G</kbd>: Go to the last row
-- <kbd>g _</kbd>: Toggle width of all visible columns between full and default
-  width
+- <kbd>g g</kbd>: Jump to first row
+- <kbd>G</kbd>: Jump to last row
+- <kbd>g _</kbd>: Toggle column widths
 - <kbd>q</kbd>: Quit
 
 ## License
@@ -153,7 +146,7 @@ Below are some helpful navigation controls:
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file
 for details.
 
-The IMDb datasets used by this tool are provided by IMDb and are subject to
-their own terms of service. Please refer to
+IMDb datasets are provided by IMDb and subject to their own terms of service.
+Please review
 [IMDb's data usage terms](https://help.imdb.com/article/imdb/general-information/can-i-use-imdb-data-in-my-software/G5JTRESSHJBBHTGX)
 for more information.
