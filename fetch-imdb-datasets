@@ -41,7 +41,7 @@ for dataset in "${!dataset_files[@]}"; do
   # 1 - tconst         --> renamed to 'id'
   # 6 - startYear      --> renamed to 'year'
   # 8 - runtimeMinutes --> renamed to 'duration'
-  # 9 - genres         --> renamed to 'genres'
+  # 9 - genres         --> preserved as 'genres'
   if [[ "$dataset" == "basics" ]]
   then
     echo -e "id\tyear\tduration\tgenres" > "$dataset_dir/$dataset.tsv"
