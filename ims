@@ -211,6 +211,7 @@ def query_movie_db(
     check_datasets()
 
     movies: dict[str, Movie] = {}
+
     # Identify all movies in the database and determine their years and genres.
     with open(basics_db, newline="", encoding="utf-8") as f:
         log(f"Processing '{basics_db}'...")
