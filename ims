@@ -56,6 +56,11 @@ def log(message: str):
     print(message, file=sys.stderr)
 
 
+def error(message: str):
+    log(f"Error: {message}")
+    sys.exit(1)
+
+
 class MovieQueryParams:
     def __init__(
         self,
@@ -70,33 +75,25 @@ class MovieQueryParams:
         genres: set[str],
     ):
         if min_duration < 0:
-            log("Error: minimum duration must be a non-negative integer.")
-            sys.exit(1)
+            error("Minimum duration must be a non-negative integer.")
         if max_duration < min_duration:
-            log("Error: maximum duration cannot be smaller than minimum duration.")
-            sys.exit(1)
+            error("Maximum duration cannot be smaller than minimum duration.")
         if not 0 <= min_rating <= 10:
-            log("Error: minimum rating must be between 0 and 10.")
-            sys.exit(1)
+            error("Minimum rating must be between 0 and 10.")
         if min_num_votes < 0:
-            log("Error: minimum number of votes must be a non-negative integer.")
-            sys.exit(1)
+            error("Minimum number of votes must be a non-negative integer.")
         if max_num_votes < min_num_votes:
-            log(
-                "Error: maximum number of votes cannot be smaller than minimum number of votes."
+            error(
+                "Maximum number of votes cannot be smaller than minimum number of votes."
             )
-            sys.exit(1)
         if min_year < 1888:
-            log("Error: minimum movie year must be 1888 or later.")
-            sys.exit(1)
+            error("Minimum movie year must be 1888 or later.")
         if max_year < min_year:
-            log("Error: maximum movie year cannot be smaller than minimum movie year.")
-            sys.exit(1)
+            error("Maximum movie year cannot be smaller than minimum movie year.")
         if not genres <= all_genres:
-            log(
-                f"Error: Invalid genres specified. Allowed genres are: {', '.join(all_genres)}."
+            error(
+                f"Invalid genres specified. Allowed genres are: {', '.join(all_genres)}."
             )
-            sys.exit(1)
 
         self._min_duration = min_duration
         self._max_duration = max_duration
@@ -112,7 +109,7 @@ class MovieQueryParams:
 class Movie:
     def __init__(self, id: str):
         if not re.match(r"^tt\d{7,}$", id):
-            raise ValueError(f"Invalid IMDb movie ID: {id}")
+            error(f"Invalid IMDb movie ID: {id}")
         self._id = id
         self._title: str | None = None
         self._duration: int | None = None
@@ -126,30 +123,30 @@ class Movie:
 
     def set_title(self, title: str):
         if title == "\\N":
-            raise ValueError(f"{self._id}: Invalid movie title '{title}'.")
+            error(f"{self._id}: Invalid movie title '{title}'.")
         self._title = title
 
     def set_duration(self, duration: int):
         if duration < 0:
-            raise ValueError(f"{self._id}: Invalid duration '{duration}'.")
+            error(f"{self._id}: Invalid duration '{duration}'.")
         self._duration = duration
 
     def set_rating(self, rating: float, num_votes: int):
         if not 0 <= rating <= 10:
-            raise ValueError(f"{self._id}: Invalid movie rating '{rating}'.")
+            error(f"{self._id}: Invalid movie rating '{rating}'.")
         if not num_votes >= 0:
-            raise ValueError(f"{self._id}: Invalid number of votes '{num_votes}'.")
+            error(f"{self._id}: Invalid number of votes '{num_votes}'.")
         self._rating = rating
         self._num_votes = num_votes
 
     def set_year(self, year: int):
         if year < 1888:
-            raise ValueError(f"{self._id}: Invalid movie year '{year}'.")
+            error(f"{self._id}: Invalid movie year '{year}'.")
         self._year = year
 
     def set_genres(self, genres: set[str]):
         if not genres <= all_genres:
-            raise ValueError(f"{self._id}: Invalid genres '{genres}'.")
+            error(f"{self._id}: Invalid genres '{genres}'.")
         self._genres = genres
 
     def is_data_complete(self):
@@ -224,7 +221,7 @@ def query_movie_db(
             duration = row["duration"]
             genres = row["genres"]
             if movie_id in movies:
-                raise ValueError(f"Duplicate movie ID found: {movie_id}")
+                error(f"Duplicate movie ID found: {movie_id}")
             movies[movie_id] = Movie(movie_id)
             if year != "\\N":
                 movies[movie_id].set_year(int(year))
@@ -372,8 +369,7 @@ def main():
         try:
             subprocess.run(["./fetch-imdb-datasets"], check=True)
         except subprocess.CalledProcessError as error:
-            log(f"Failed to fetch IMDb datasets: {error}")
-            sys.exit(1)
+            error(f"Failed to fetch IMDb datasets: {error}")
 
     query_params = MovieQueryParams(
         args.min_duration,
