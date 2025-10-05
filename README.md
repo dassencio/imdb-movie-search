@@ -36,10 +36,10 @@ To search for movies matching certain criteria, simply use the `ims` tool:
 - `--min-year YEAR`: Minimum release year (default: `1888`)
 - `--max-year YEAR`: Maximum release year (default: current year)
 - `--genres LIST`: Comma-separated list of genres to include (default: all
-   genres)
+  genres)
 - `--output-format FORMAT`: Output format - `tsv` or `json` (default: `tsv`)
 - `--refresh-datasets`: Force refresh of IMDb datasets
-- `-h, --help`: Show help message
+- `-h, --help`: Show help message and exit
 
 #### Available genres
 
@@ -61,10 +61,10 @@ The following genres can be used with the `--genres` option:
 **Find recent comedy movies under 2 hours:**
 
 ```bash
-./ims --min-year 2020 --max-duration 120 --genres Comedy --output-format json
+./ims --min-year 2025 --max-duration 120 --genres Comedy --output-format json
 ```
 
-**Find classic movies with high vote counts:**
+**Find top-rated movies with high vote counts:**
 
 ```bash
 ./ims --max-year 1980 --min-num-votes 50000 --min-rating 8.0
@@ -84,7 +84,7 @@ ones.
 
 #### TSV output (default)
 
-By default, the output is TSV (tab-separated values) file named `movies.tsv`
+By default, the output is a TSV (tab-separated values) file named `movies.tsv`
 with the following columns:
 
 - `id`: IMDb title identifier (e.g., `tt1234567`)
@@ -97,8 +97,8 @@ with the following columns:
 
 #### JSON output
 
-Structured JSON array with movie objects containing the same fields as TSV
-format.
+Structured JSON array with movie objects containing the same fields as the
+columns from the TSV format.
 
 ### Updating the movie datasets
 
@@ -118,8 +118,8 @@ a dataset refresh:
 
 ### Visualizing results with VisiData
 
-If you’re working in a GitHub Codespace or VS Code devcontainer, you can use
-[VisiData](https://visidata.org/) (to explore the generated file interactively
+If you're working in a GitHub Codespace or VS Code devcontainer, you can use
+[VisiData](https://visidata.org/) to explore the generated file interactively
 by running:
 
 ```bash
@@ -139,17 +139,8 @@ pip install visidata
 ```
 
 Below are some helpful navigation controls:
-vd movies.json
-```
 
-To install and use VisiData locally, open a terminal and run:
-
-```bash
-pip install visidata
-```
-
-Below are some helpful navigation controls:
-- <kbd>↑</kbd>/<kbd>↓</kbd>/<kbd>←</kbd>/<kbd>→</kbd>: Move cursor
+- <kbd>↑</kbd> / <kbd>↓</kbd> / <kbd>←</kbd> / <kbd>→</kbd>: Move cursor
 - <kbd>/</kbd>: Search
 - <kbd>g g</kbd>: Go to the first row
 - <kbd>G</kbd>: Go to the last row
