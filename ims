@@ -304,49 +304,49 @@ def main():
         type=float,
         required=False,
         default=0.0,
-        help="minimum movie average rating required for it to be included (e.g. 5.0)",
+        help="minimum movie average rating (e.g. 5.0)",
     )
     parser.add_argument(
         "--max-rating",
         type=float,
         required=False,
         default=10.0,
-        help="maximum movie average rating for it to be included (e.g. 7.5)",
+        help="maximum movie average rating (e.g. 7.5)",
     )
     parser.add_argument(
         "--min-num-votes",
         type=int,
         required=False,
         default=0,
-        help="minimum number of movie votes for it to be included (e.g. 10000)",
+        help="minimum number of movie votes (e.g. 10000)",
     )
     parser.add_argument(
         "--max-num-votes",
         type=int,
         required=False,
         default=sys.maxsize,
-        help="maximum number of movie votes for it to be included (e.g. 100000)",
+        help="maximum number of movie votes (e.g. 100000)",
     )
     parser.add_argument(
         "--min-year",
         type=int,
         required=False,
         default=1888,
-        help="minimum movie year for it to be included (e.g. 2005)",
+        help="minimum movie year (e.g. 2005)",
     )
     parser.add_argument(
         "--max-year",
         type=int,
         required=False,
         default=datetime.datetime.now().strftime("%Y"),
-        help="maximum movie year for it to be included (e.g. 2025)",
+        help="maximum movie year (e.g. 2025)",
     )
     parser.add_argument(
         "--genres",
         type=str,
         required=False,
         default=",".join(all_genres),
-        help="comma-separated list of genres to include (e.g. Action,Drama,Sci-Fi)",
+        help="comma-separated list of genres (e.g. Action,Drama,Sci-Fi)",
     )
     parser.add_argument(
         "--output-format",
