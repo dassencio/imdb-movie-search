@@ -42,10 +42,10 @@ To search for movies, simply run:
 
 The `--genres` option accepts any of the following:
 
-  Action, Adult, Adventure, Animation, Biography, Comedy, Crime, Documentary,
-  Drama, Family, Fantasy, Film-Noir, Game-Show, History, Horror, Music, Musical,
-  Mystery, News, Reality-TV, Romance, Sci-Fi, Short, Sport, Talk-Show, Thriller,
-  War, Western
+    Action, Adult, Adventure, Animation, Biography, Comedy, Crime, Documentary,
+    Drama, Family, Fantasy, Film-Noir, Game-Show, History, Horror, Music,
+    Musical, Mystery, News, Reality-TV, Romance, Sci-Fi, Short, Sport,
+    Talk-Show, Thriller, War, Western
 
 ## Examples
 
