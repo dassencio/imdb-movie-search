@@ -12,8 +12,9 @@ preprocess the latest IMDb datasets from
 creates a clean, searchable database of movies (excluding TV shows, episodes,
 etc.), with a focus on English-language titles for consistency.
 
-**Note:** The initial download and processing may take several minutes,
-depending on your internet speed and system performance.
+> [!NOTE] 
+> The initial download and processing may take several minutes, depending on 
+> your internet speed and system performance.
 
 ## Usage instructions
 
@@ -73,8 +74,9 @@ The `--genres` option accepts any of the following:
 ./ims --min-duration 180 --genres Drama,Adventure,War --min-rating 7.5
 ```
 
-**Tip:** Using `--min-num-votes` helps filter out less known movies, leaving
-only well-regarded titles.
+> [!TIP]
+> Using `--min-num-votes` helps filter out less known movies, leaving only
+> well-regarded titles.
 
 ## Output formats
 
