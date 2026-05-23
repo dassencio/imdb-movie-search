@@ -10,7 +10,6 @@ import subprocess
 import sys
 import typing
 
-
 # Directory where the pre-processed IMDb datasets are stored.
 datasets_dir = "./datasets"
 
@@ -355,7 +354,7 @@ def main():
         default="tsv",
         choices=["json", "tsv"],
         help="output format for the query results (tsv or json)",
-    ),
+    )
     parser.add_argument(
         "--refresh-datasets",
         action="store_true",

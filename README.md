@@ -12,8 +12,8 @@ preprocess the latest IMDb datasets from
 creates a clean, searchable database of movies (excluding TV shows, episodes,
 etc.), with a focus on English-language titles for consistency.
 
-> [!NOTE] 
-> The initial download and processing may take several minutes, depending on 
+> [!NOTE]
+> The initial download and processing may take several minutes, depending on
 > your internet speed and system performance.
 
 ## Usage instructions
