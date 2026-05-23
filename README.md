@@ -35,6 +35,7 @@ To search for movies, simply run:
 - `--min-year YEAR`: Minimum release year (default: `1888`)
 - `--max-year YEAR`: Maximum release year (default: current year)
 - `--genres LIST`: Comma-separated list of genres to include (default: all)
+- `--exclude-from FILE`: Path to file containing movies to be excluded (by ID)
 - `--output-format FORMAT`: Output format (`tsv` or `json`, default: `tsv`)
 - `--refresh-datasets`: Force refresh of IMDb datasets
 - `-h, --help`: Show help message and exit
@@ -77,6 +78,28 @@ The `--genres` option accepts any of the following:
 > [!TIP]
 > Using `--min-num-votes` helps filter out less known movies, leaving only
 > well-regarded titles.
+
+## Excluding movies
+
+Use `--exclude-from` to exclude specific movies from the output. This is useful
+for keeping track of movies you have already watched so they no longer appear in
+search results.
+
+The file must contain one IMDb movie ID per line. Any additional content on a
+line (after the ID) is ignored, so you can safely use a previously generated
+output file in TSV format directly as an exclude file:
+
+```bash
+./ims --min-rating 8.0 --exclude-from movies-exclude.tsv
+```
+
+You can also maintain a plain list of IDs with optional annotations:
+
+```
+tt0209144  Memento
+tt0361748  Inglourious Basterds
+tt0405094  The Lives of Others
+```
 
 ## Output formats
 

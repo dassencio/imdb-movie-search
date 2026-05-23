@@ -72,6 +72,7 @@ class MovieQueryParams:
         min_year: int,
         max_year: int,
         genres: set[str],
+        excluded_ids: set[str],
     ):
         if min_duration < 0:
             error("Minimum duration must be a non-negative integer.")
@@ -103,6 +104,7 @@ class MovieQueryParams:
         self._min_year = min_year
         self._max_year = max_year
         self._genres = genres
+        self._excluded_ids = excluded_ids
 
 
 class Movie:
@@ -161,6 +163,7 @@ class Movie:
     def matches_requirements(self, query_params):
         return (
             self.is_data_complete()
+            and self._id not in query_params._excluded_ids
             and query_params._min_duration
             <= self._duration
             <= query_params._max_duration
@@ -202,6 +205,20 @@ def check_datasets():
         and os.path.exists(basics_db)
         and os.path.exists(ratings_db)
     )
+
+
+def load_excluded_ids(path: str | None):
+    excluded_ids: set[str] = set()
+    if path:
+        try:
+            with open(path, encoding="utf-8") as f:
+                for line in f:
+                    parts = line.split()
+                    if parts:
+                        excluded_ids.add(parts[0])
+        except OSError as e:
+            error(f"Failed to read file '{path}': {e}")
+    return excluded_ids
 
 
 def query_movie_db(
@@ -348,6 +365,13 @@ def main():
         help="comma-separated list of genres (e.g. Action,Drama,Sci-Fi)",
     )
     parser.add_argument(
+        "--exclude-from",
+        type=str,
+        required=False,
+        default=None,
+        help="path to file containing movies to be excluded (by ID)",
+    )
+    parser.add_argument(
         "--output-format",
         type=str,
         required=False,
@@ -371,6 +395,8 @@ def main():
         except subprocess.CalledProcessError as subprocess_error:
             error(f"Failed to fetch IMDb datasets: {subprocess_error}")
 
+    excluded_ids = load_excluded_ids(args.exclude_from)
+
     query_params = MovieQueryParams(
         args.min_duration,
         args.max_duration,
@@ -381,6 +407,7 @@ def main():
         args.min_year,
         args.max_year,
         set(args.genres.split(",")),
+        excluded_ids,
     )
 
     movies = query_movie_db(query_params)
